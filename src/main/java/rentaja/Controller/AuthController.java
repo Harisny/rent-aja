@@ -27,7 +27,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody AuthRequest req) {
         service.register(req);
         ApiResponse<String> res = ApiResponse.<String>builder()
-                .message("Register is Successfully")
+                .message("register is success")
                 .status(HttpStatus.OK.value())
                 .build();
 
@@ -38,7 +38,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest req) {
         AuthResponse data = service.login(req);
         ApiResponse<AuthResponse> res = ApiResponse.<AuthResponse>builder()
-                .message("Login is Successfully")
+                .message("login is Success")
                 .status(HttpStatus.OK.value())
                 .data(data)
                 .build();

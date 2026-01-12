@@ -14,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -31,6 +32,7 @@ import rentaja.Entity.Enums.Role;
 @AllArgsConstructor
 public class User implements UserDetails {
     @Id
+    @PrimaryKeyJoinColumn(referencedColumnName = "id")
     @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 5)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
     @Column(name = "id", nullable = false)

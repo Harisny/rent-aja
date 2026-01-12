@@ -51,17 +51,17 @@ public class GlobalExceptionHandler {
 
         // handle formated error atau validation
         @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException ex) {
+        public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
                 Map<String, String> errors = new HashMap<>();
 
                 ex.getBindingResult().getFieldErrors().forEach(err -> {
                         errors.put(err.getField(), err.getDefaultMessage());
                 });
 
-                ApiResponse<Object> res = ApiResponse.builder()
+                ApiResponse<Map<String, String>> res = ApiResponse.<Map<String, String>>builder()
                                 .message("Validation Failed")
                                 .status(HttpStatus.BAD_REQUEST.value())
-                                .data(errors)
+                                .errors(errors)
                                 .build();
                 return ResponseEntity.badRequest().body(res);
         }

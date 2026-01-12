@@ -45,15 +45,15 @@ public class AuthService {
         User user = new User();
         user.setEmail(req.getEmail());
         user.setPassword(encoder.encode(req.getPassword()));
-        user.setRole(Role.USER);
+        user.setRole(Role.ROLE_USER);
 
         try {
             repo.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Email sudah terdaftar");
+            throw new ConflictException("email registered");
         } catch (Exception e) {
-            log.error("Register Failed", e);
-            throw new InternalServerErrorException("Failed to proccess User operation");
+            log.error("register failed", e);
+            throw new InternalServerErrorException("failed to proccess user operation");
         }
     }
 
@@ -64,20 +64,21 @@ public class AuthService {
                             req.getEmail(),
                             req.getPassword()));
         } catch (AuthenticationException e) {
-            throw new UnauthorizedException("Wrong Password or Email");
+            throw new UnauthorizedException("wrong password or email");
         }
 
         User user = repo.findByEmail(req.getEmail())
-                .orElseThrow(() -> new InternalServerErrorException("User authenticated but not found"));
+                .orElseThrow(() -> new InternalServerErrorException("user authenticated but not found"));
 
         String token;
         try {
             token = jwtService.generateToken(user);
         } catch (Exception e) {
-            log.error("Jwt generation Failed", e);
-            throw new InternalServerErrorException("Login Failed");
+            log.error("jwt generation failed", e);
+            throw new InternalServerErrorException("login failed");
         }
         return AuthResponse.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .token(token)
