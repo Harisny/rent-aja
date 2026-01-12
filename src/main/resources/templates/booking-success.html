@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f7;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #4caf50;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 30px;
+      }
+      .booking-details {
+        background-color: #f9f9f9;
+        border-left: 4px solid #4caf50;
+        padding: 15px;
+        margin: 20px 0;
+      }
+      .detail-row {
+        margin-bottom: 10px;
+      }
+      .label {
+        font-weight: bold;
+        color: #666;
+        width: 100px;
+        display: inline-block;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2 style="margin: 0">Booking Confirmed!</h2>
+      </div>
+
+      <div class="content">
+        <p>Hello <strong th:text="${name}">User</strong>,</p>
+        <p>
+          Your booking has been successfully confirmed. Here are your
+          reservation details:
+        </p>
+
+        <div class="booking-details">
+          <div class="detail-row">
+            <span class="label">Field:</span>
+            <span th:text="${field}">Field Name</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Start:</span>
+            <span th:text="${#temporals.format(start, 'dd MMM yyyy, HH:mm')}"
+              >2026-01-12 10:00</span
+            >
+          </div>
+          <div class="detail-row">
+            <span class="label">End:</span>
+            <span th:text="${#temporals.format(end, 'dd MMM yyyy, HH:mm')}"
+              >2026-01-12 12:00</span
+            >
+          </div>
+        </div>
+
+        <p>
+          Thank you for choosing <strong>RentAja</strong>. Please arrive 10
+          minutes before your schedule.
+        </p>
+      </div>
+
+      <div class="footer">
+        &copy; 2026 RentAja Service. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

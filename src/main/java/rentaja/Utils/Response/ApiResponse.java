@@ -13,4 +13,5 @@ public class ApiResponse<T> {
     private String message;
     private Integer status;
     private T data;
+    private Object errors;
 }
