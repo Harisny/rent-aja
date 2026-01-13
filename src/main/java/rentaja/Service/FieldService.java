@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import rentaja.DTO.Field.FieldRequest;
 import rentaja.DTO.Field.FieldResponse;
 import rentaja.Entity.Field;
+import rentaja.Entity.Enums.FieldStatus;
 import rentaja.Exception.Exceptions.ConflictException;
 import rentaja.Exception.Exceptions.NotFoundException;
 import rentaja.Repository.FieldRepository;
@@ -25,6 +26,7 @@ public class FieldService {
         field.setName(req.getName());
         field.setOpenTime(req.getOpenTime());
         field.setCloseTime(req.getCloseTime());
+        field.setStatus(FieldStatus.AVAILABLE);
 
         Field saved;
 

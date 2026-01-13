@@ -1,6 +1,7 @@
 package rentaja.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,16 @@ import rentaja.Entity.Field;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
+        @Query(value = """
+                        SELECT b FROM Booking b
+                        JOIN b.user u
+                        WHERE b.id = :id
+                        AND u.email = :email
+                        """)
+        Optional<Booking> findByIdAndEmail(Integer id, String email);
+
+        // Optional<Booking> findByIdAndUser_Email(Integer id, String email);
+
         boolean existsByFieldAndStartTimeLessThanAndEndTimeGreaterThan(Field field, LocalDateTime end,
                         LocalDateTime start);
 

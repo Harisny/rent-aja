@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -15,8 +17,11 @@ import rentaja.Entity.Booking;
 import rentaja.Entity.Field;
 import rentaja.Entity.User;
 import rentaja.Entity.Enums.BookingStatus;
+import rentaja.Entity.Enums.FieldStatus;
+import rentaja.Exception.Exceptions.BadRequestException;
 import rentaja.Exception.Exceptions.ConflictException;
 import rentaja.Exception.Exceptions.NotFoundException;
+import rentaja.Exception.Exceptions.UnauthorizedException;
 import rentaja.Repository.BlockedScheduleRepository;
 import rentaja.Repository.BookingRepository;
 import rentaja.Repository.FieldRepository;
@@ -57,6 +62,10 @@ public class BookingService {
                         throw new ConflictException("slot is not available");
                 }
 
+                if (field.getStatus().equals(FieldStatus.UNAVAILABLE)) {
+                        throw new BadRequestException("field is not available");
+                }
+
                 Booking booking = new Booking();
                 booking.setUser(user);
                 booking.setField(field);
@@ -71,21 +80,30 @@ public class BookingService {
         }
 
         public List<BookingResponse> bookings() {
-                List<Booking> data = repo.findAll();
-                return data.stream().map(BookingResponse::new).toList();
+                List<Booking> booking = repo.findAll();
+                return booking.stream().map(BookingResponse::new).toList();
         }
 
         public BookingResponse detail(Integer id) {
-                Booking data = repo.findById(id)
-                                .orElseThrow(() -> new NotFoundException("booking id : " + id + " was not found"));
-                return new BookingResponse(data);
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Booking booking = repo.findById(id).orElseThrow(
+                                () -> new UnauthorizedException("Booking id : " + id + " was not found"));
+
+                if (booking.getUser().getEmail().equals(auth.getName())) {
+                        throw new UnauthorizedException("You are not allowed to access this booking");
+                }
+                return new BookingResponse(booking);
         }
 
         @Transactional
         public BookingResponse modify(Integer id, BookingRequest req) {
-                // Booking Id
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 Booking booking = repo.findById(id)
-                                .orElseThrow(() -> new NotFoundException("booking id : " + id + " was not found"));
+                                .orElseThrow(() -> new NotFoundException("Booking id : " + id + " was not found"));
+
+                if (!booking.getUser().getEmail().equals(auth.getName())) {
+                        throw new UnauthorizedException("You are not allowed to access this booking");
+                }
 
                 if (booking.getStatus() == BookingStatus.CANCELLED) {
                         throw new ConflictException("cancelled booking cannot be updated");
@@ -107,6 +125,7 @@ public class BookingService {
                 booking.setField(field);
                 booking.setStartTime(req.getStartTime());
                 booking.setEndTime(req.getEndTime());
+                booking.setStatus(BookingStatus.RESCHEDULED);
                 booking.setUpdateAt(LocalDateTime.now());
 
                 Booking saved = repo.save(booking);
@@ -115,10 +134,14 @@ public class BookingService {
         }
 
         public void remove(Integer id) {
-                try {
-                        repo.deleteById(id);
-                } catch (Exception e) {
-                        throw new NotFoundException("booking id : " + id + " didnt exist");
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Booking booking = repo.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Booking id : " + id + " was not found"));
+
+                if (!booking.getUser().getEmail().equals(auth.getName())) {
+                        throw new UnauthorizedException("You are not allowed to access this booking");
                 }
+
+                repo.delete(booking);
         }
 }
