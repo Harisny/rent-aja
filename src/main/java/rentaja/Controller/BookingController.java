@@ -60,7 +60,7 @@ public class BookingController {
     @GetMapping("/booking/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<BookingResponse>> booking(@PathVariable("id") Integer id) {
-        BookingResponse data = service.detail(id);
+        BookingResponse data = service.bookDetail(id);
         ApiResponse<BookingResponse> res = ApiResponse.<BookingResponse>builder()
                 .message("retrieve booking is Success")
                 .status(HttpStatus.OK.value())
@@ -74,7 +74,7 @@ public class BookingController {
     public ResponseEntity<ApiResponse<BookingResponse>> reschedule(
             @Valid @PathVariable("id") Integer id, @RequestBody BookingRequest req) {
 
-        BookingResponse data = service.modify(id, req);
+        BookingResponse data = service.bookModify(id, req);
         ApiResponse<BookingResponse> res = ApiResponse.<BookingResponse>builder()
                 .message("modify/update booking is success")
                 .status(HttpStatus.OK.value())
@@ -86,7 +86,7 @@ public class BookingController {
     @DeleteMapping("/booking/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BookingResponse>> remove(@PathVariable("id") Integer id) {
-        service.remove(id);
+        service.bookRemove(id);
         ApiResponse<BookingResponse> res = ApiResponse.<BookingResponse>builder()
                 .message("remove Booking is Success")
                 .status(HttpStatus.OK.value())

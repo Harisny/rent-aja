@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,6 @@ import rentaja.Entity.Enums.FieldStatus;
 import rentaja.Exception.Exceptions.BadRequestException;
 import rentaja.Exception.Exceptions.ConflictException;
 import rentaja.Exception.Exceptions.NotFoundException;
-import rentaja.Exception.Exceptions.UnauthorizedException;
 import rentaja.Repository.BlockedScheduleRepository;
 import rentaja.Repository.BookingRepository;
 import rentaja.Repository.FieldRepository;
@@ -47,18 +47,23 @@ public class BookingService {
 
         @Transactional
         public BookingResponse bookSlot(BookingRequest req, String email) {
-                User user = userRepo.findByEmail(email)
-                                .orElseThrow(() -> new NotFoundException("user : " + email + " was not found"));
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+                if (!email.equals(auth.getName())) {
+                        throw new AccessDeniedException("Forbidden");
+                }
+
+                User user = userRepo.findByEmail(auth.getName())
+                                .orElseThrow(() -> new NotFoundException(
+                                                "user : " + auth.getName() + " was not found"));
 
                 Field field = fieldRepo.findById(req.getFieldId())
                                 .orElseThrow(() -> new NotFoundException(
                                                 "field id : " + user.getId() + " was not found"));
 
-                if (repo.existsByFieldAndStartTimeLessThanAndEndTimeGreaterThan(field, req.getEndTime(),
-                                req.getStartTime())
-                                || blockRepo.existsByFieldAndStartTimeLessThanAndEndTimeGreaterThan(field,
-                                                req.getEndTime(),
-                                                req.getStartTime())) {
+                if (repo.checkSlot(field.getId(), req.getStartTime(), req.getEndTime(),
+                                List.of(BookingStatus.CONFIRMED, BookingStatus.PENDING_PAYMENT))
+                                || blockRepo.checkSlot(field.getId(), req.getStartTime(), req.getEndTime())) {
                         throw new ConflictException("slot is not available");
                 }
 
@@ -84,32 +89,32 @@ public class BookingService {
                 return booking.stream().map(BookingResponse::new).toList();
         }
 
-        public BookingResponse detail(Integer id) {
+        public BookingResponse bookDetail(Integer id) {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                Booking booking = repo.findById(id).orElseThrow(
-                                () -> new UnauthorizedException("Booking id : " + id + " was not found"));
 
-                if (booking.getUser().getEmail().equals(auth.getName())) {
-                        throw new UnauthorizedException("You are not allowed to access this booking");
+                Booking booking = repo.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Booking id " + id + " tidak ditemukan"));
+
+                if (!booking.getUser().getEmail().equals(auth.getName())) {
+                        throw new AccessDeniedException("Forbidden");
                 }
+
                 return new BookingResponse(booking);
         }
 
+        // @PreAuthorize("#booking.user.email == authentication.name") bisa seperti ini,
+        // clean code
         @Transactional
-        public BookingResponse modify(Integer id, BookingRequest req) {
+        public BookingResponse bookModify(Integer id, BookingRequest req) {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                Booking booking = repo.findById(id)
-                                .orElseThrow(() -> new NotFoundException("Booking id : " + id + " was not found"));
-
-                if (!booking.getUser().getEmail().equals(auth.getName())) {
-                        throw new UnauthorizedException("You are not allowed to access this booking");
-                }
+                Booking booking = repo.findByIdAndEmail(id, auth.getName())
+                                .orElseThrow(() -> new AccessDeniedException("Forbidden"));
 
                 if (booking.getStatus() == BookingStatus.CANCELLED) {
                         throw new ConflictException("cancelled booking cannot be updated");
                 }
 
-                // field Id from booking
+                // field Id dari booking
                 Field field = booking.getField();
                 if (!field.getId().equals(req.getFieldId())) {
                         // jika field lama ingin di update field baru
@@ -118,7 +123,8 @@ public class BookingService {
                 }
 
                 // checking jika slot tersedia
-                if (repo.checkSlot(field.getId(), id, req.getStartTime(), req.getEndTime())) {
+                if (repo.checkSlotUpdate(field.getId(), id, req.getStartTime(), req.getEndTime(),
+                                List.of(BookingStatus.CONFIRMED, BookingStatus.PENDING_PAYMENT))) {
                         throw new ConflictException("slot is not available");
                 }
 
@@ -133,14 +139,9 @@ public class BookingService {
                 return new BookingResponse(saved);
         }
 
-        public void remove(Integer id) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        public void bookRemove(Integer id) {
                 Booking booking = repo.findById(id)
-                                .orElseThrow(() -> new NotFoundException("Booking id : " + id + " was not found"));
-
-                if (!booking.getUser().getEmail().equals(auth.getName())) {
-                        throw new UnauthorizedException("You are not allowed to access this booking");
-                }
+                                .orElseThrow(() -> new NotFoundException("field id : " + id + " was not found"));
 
                 repo.delete(booking);
         }

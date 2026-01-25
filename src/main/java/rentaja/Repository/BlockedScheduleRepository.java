@@ -3,12 +3,23 @@ package rentaja.Repository;
 import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import rentaja.Entity.BlockedSchedule;
-import rentaja.Entity.Field;
 
 @Repository
 public interface BlockedScheduleRepository extends JpaRepository<BlockedSchedule, Integer> {
-    boolean existsByFieldAndStartTimeLessThanAndEndTimeGreaterThan(Field field, LocalDateTime end, LocalDateTime start);
+        @Query("""
+                            SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+                            FROM BlockedSchedule b
+                            WHERE b.field.id = :fieldId
+                                AND b.startTime < :endTime
+                                AND b.endTime > :startTime
+                        """)
+        boolean checkSlot(
+                        @Param("fieldId") Integer fieldId,
+                        @Param("startTime") LocalDateTime startTime,
+                        @Param("endTime") LocalDateTime endTime);
 }

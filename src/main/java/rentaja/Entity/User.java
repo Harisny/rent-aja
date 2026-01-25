@@ -33,14 +33,17 @@ import rentaja.Entity.Enums.Role;
 public class User implements UserDetails {
     @Id
     @PrimaryKeyJoinColumn(referencedColumnName = "id")
-    @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 5)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 5)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @Column(name = "id", nullable = false)
     private Integer id;
+
     @Column(name = "email", nullable = false)
     private String email;
+
     @Column(name = "password", nullable = false)
     private String password;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,14 +20,18 @@ import lombok.Setter;
 @Setter
 public class BlockedSchedule {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(unique = true, name = "id", nullable = false)
+    @SequenceGenerator(name = "blocked_schedule_seq", sequenceName = "blocked_schedule_seq", allocationSize = 1)
+    @GeneratedValue(generator = "blocked_schedule_seq", strategy = GenerationType.SEQUENCE)
+    @Column(name = "id", nullable = false)
     private Integer id;
+
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
+
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
-    @Column(name = "reason", nullable = true)
+
+    @Column(name = "reason")
     private String reason;
 
     @ManyToOne

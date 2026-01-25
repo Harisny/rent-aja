@@ -2,7 +2,6 @@ package rentaja.Service;
 
 import java.util.List;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import rentaja.DTO.Field.FieldRequest;
@@ -22,19 +21,19 @@ public class FieldService {
     }
 
     public FieldResponse create(FieldRequest req) {
+
+        if (repo.findByName(req.getName()).isPresent()) {
+            throw new ConflictException("field name is already exist");
+        }
+
         Field field = new Field();
         field.setName(req.getName());
         field.setOpenTime(req.getOpenTime());
         field.setCloseTime(req.getCloseTime());
         field.setStatus(FieldStatus.AVAILABLE);
 
-        Field saved;
+        Field saved = repo.save(field);
 
-        try {
-            saved = repo.save(field);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("field name is already exist");
-        }
         return new FieldResponse(saved);
     }
 
@@ -44,10 +43,8 @@ public class FieldService {
     }
 
     public void delete(Integer id) {
-        try {
-            repo.deleteById(id);
-        } catch (NotFoundException e) {
-            throw new NotFoundException("field id : " + id + " didnt Exist");
-        }
+        Field field = repo.findById(id).orElseThrow(() -> new NotFoundException("field id : " + id + " didnt Exist"));
+
+        repo.deleteById(field.getId());
     }
 }

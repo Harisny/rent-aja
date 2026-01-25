@@ -33,7 +33,12 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtEntryPoint).accessDeniedHandler(accessDenied))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
+                        auth -> auth.requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -2,10 +2,7 @@ package rentaja.Service;
 
 import java.util.List;
 
-import org.hibernate.boot.beanvalidation.IntegrationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException.InternalServerError;
-
 import jakarta.transaction.Transactional;
 import rentaja.DTO.BlockSchedule.BlockScheduleRequest;
 import rentaja.DTO.BlockSchedule.BlockScheduleResponse;
@@ -55,12 +52,7 @@ public class BlockedScheduleService {
     }
 
     public List<BlockScheduleResponse> blockSchedules() {
-        List<BlockedSchedule> data;
-        try {
-            data = repo.findAll();
-        } catch (InternalServerError e) {
-            throw new IntegrationException("cannot retrieve blocked schedule");
-        }
+        List<BlockedSchedule> data = repo.findAll();
         return data.stream().map(BlockScheduleResponse::new).toList();
     }
 

@@ -27,18 +27,23 @@ import rentaja.Entity.Enums.BookingStatus;
 @AllArgsConstructor
 public class Booking {
     @Id
-    @SequenceGenerator(name = "booking_sequence", sequenceName = "booking_sequence", allocationSize = 5)
-    @GeneratedValue(generator = "booking_sequence", strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", unique = true, nullable = false)
+    @SequenceGenerator(name = "booking_seq", sequenceName = "booking_seq", allocationSize = 1)
+    @GeneratedValue(generator = "booking_seq", strategy = GenerationType.SEQUENCE)
+    @Column(name = "id", nullable = false)
     private Integer id;
+
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
+
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
+
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
