@@ -10,15 +10,13 @@ import rentaja.Entity.BlockedSchedule;
 @Setter
 public class BlockScheduleResponse {
     private Integer id;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDateTime time;
     private String reason;
     private Integer fieldId;
 
     public BlockScheduleResponse(BlockedSchedule bc) {
         this.id = bc.getId();
-        this.startTime = bc.getStartTime();
-        this.endTime = bc.getEndTime();
+        this.time = bc.getTime();
         this.reason = bc.getReason();
         this.fieldId = bc.getField().getId();
     }

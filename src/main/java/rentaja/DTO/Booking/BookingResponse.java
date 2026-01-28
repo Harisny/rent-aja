@@ -13,8 +13,7 @@ public class BookingResponse {
     private Integer id;
     private String user;
     private String field;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDateTime time;
     private BookingStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updateTime;
@@ -23,8 +22,7 @@ public class BookingResponse {
         this.id = booking.getId();
         this.user = booking.getUser().getUsername();
         this.field = booking.getField().getName();
-        this.startTime = booking.getStartTime();
-        this.endTime = booking.getEndTime();
+        this.time = booking.getTime();
         this.status = booking.getStatus();
         this.createdAt = booking.getCreatedAt();
         this.updateTime = booking.getUpdateAt();

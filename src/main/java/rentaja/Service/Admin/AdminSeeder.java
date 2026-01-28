@@ -29,5 +29,4 @@ public class AdminSeeder implements CommandLineRunner {
             repo.save(admin);
         }
     }
-
 }

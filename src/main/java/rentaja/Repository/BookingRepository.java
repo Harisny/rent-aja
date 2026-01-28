@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import rentaja.Entity.Booking;
-import rentaja.Entity.Field;
 import rentaja.Entity.Enums.BookingStatus;
 
 @Repository
@@ -22,6 +21,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                         AND u.email = :email
                         """)
         Optional<Booking> findByIdAndEmail(Integer id, String email);
+
+        List<Booking> findAllByUserEmail(String email);
 
         @Query(value = """
                         SELECT b FROM Booking b
@@ -35,39 +36,34 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
         // Optional<Booking> findByIdAndUser_Email(Integer id, String email);
 
-        boolean existsByFieldAndStartTimeLessThanAndEndTimeGreaterThan(Field field, LocalDateTime end,
-                        LocalDateTime start);
-
         // JPQL
         @Query("""
-                            SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
-                            FROM Booking b
-                            WHERE b.field.id = :fieldId
-                                AND b.startTime < :endTime
-                                AND b.endTime > :startTime
-                                AND b.status IN :statuses
+                        SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+                        FROM Booking b
+                        WHERE b.field.id = :fieldId
+                        AND b.time = :time
+                        AND b.status IN :statuses
                         """)
         boolean checkSlot(
                         @Param("fieldId") Integer fieldId,
-                        @Param("startTime") LocalDateTime startTime,
-                        @Param("endTime") LocalDateTime endTime,
+                        @Param("time") LocalDateTime time,
                         @Param("statuses") List<BookingStatus> statuses);
 
         @Query("""
-                            SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
-                            FROM Booking b
-                            WHERE b.field.id = :fieldId
-                                AND b.id <> :id
-                                AND b.startTime < :endTime
-                                AND b.endTime > :startTime
-                                AND b.status IN :statuses
+                        SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+                        FROM Booking b
+                        WHERE b.field.id = :fieldId
+                        AND b.id <> :id
+                        AND b.time = :time
+                        AND b.status IN :statuses
                         """)
         boolean checkSlotUpdate(
                         @Param("fieldId") Integer fieldId,
                         @Param("id") Integer id,
-                        @Param("startTime") LocalDateTime startTime,
-                        @Param("endTime") LocalDateTime endTime,
+                        @Param("time") LocalDateTime time,
                         @Param("statuses") List<BookingStatus> statuses);
+
+        boolean existsByFieldIdAndTime(Integer field, LocalDateTime time);
 }
 
 // NATIVE SQL

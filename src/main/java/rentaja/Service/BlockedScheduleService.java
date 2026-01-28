@@ -33,8 +33,7 @@ public class BlockedScheduleService {
         Field field = fieldRepo.findById(req.getFieldId())
                 .orElseThrow(() -> new NotFoundException("field id : " + req.getFieldId() + " didnt exist"));
 
-        if (bookRepo.existsByFieldAndStartTimeLessThanAndEndTimeGreaterThan(field, req.getEndTime(),
-                req.getStartTime())) {
+        if (bookRepo.existsByFieldIdAndTime(field.getId(), req.getTime())) {
             throw new ConflictException("field is already booking by user");
         }
 
@@ -42,8 +41,7 @@ public class BlockedScheduleService {
         fieldStatus.setStatus(FieldStatus.UNAVAILABLE);
 
         BlockedSchedule data = new BlockedSchedule();
-        data.setStartTime(req.getStartTime());
-        data.setEndTime(req.getEndTime());
+        data.setTime(req.getTime());
         data.setReason(req.getReason());
         data.setField(field);
 

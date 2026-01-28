@@ -61,9 +61,9 @@ public class BookingService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "field id : " + user.getId() + " was not found"));
 
-                if (repo.checkSlot(field.getId(), req.getStartTime(), req.getEndTime(),
+                if (repo.checkSlot(field.getId(), req.getTime(),
                                 List.of(BookingStatus.CONFIRMED, BookingStatus.PENDING_PAYMENT))
-                                || blockRepo.checkSlot(field.getId(), req.getStartTime(), req.getEndTime())) {
+                                || blockRepo.checkSlot(field.getId(), req.getTime())) {
                         throw new ConflictException("slot is not available");
                 }
 
@@ -74,8 +74,7 @@ public class BookingService {
                 Booking booking = new Booking();
                 booking.setUser(user);
                 booking.setField(field);
-                booking.setStartTime(req.getStartTime());
-                booking.setEndTime(req.getEndTime());
+                booking.setTime(req.getTime());
                 booking.setStatus(BookingStatus.CONFIRMED);
                 booking.setCreatedAt(LocalDateTime.now());
 
@@ -84,7 +83,14 @@ public class BookingService {
                 return new BookingResponse(saved);
         }
 
-        public List<BookingResponse> bookings() {
+        public List<BookingResponse> bookingsUser() {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+                List<Booking> bookingById = repo.findAllByUserEmail(auth.getName());
+                return bookingById.stream().map(BookingResponse::new).toList();
+        }
+
+        public List<BookingResponse> bookingsAdmin() {
                 List<Booking> booking = repo.findAll();
                 return booking.stream().map(BookingResponse::new).toList();
         }
@@ -123,14 +129,13 @@ public class BookingService {
                 }
 
                 // checking jika slot tersedia
-                if (repo.checkSlotUpdate(field.getId(), id, req.getStartTime(), req.getEndTime(),
+                if (repo.checkSlotUpdate(field.getId(), id, req.getTime(),
                                 List.of(BookingStatus.CONFIRMED, BookingStatus.PENDING_PAYMENT))) {
                         throw new ConflictException("slot is not available");
                 }
 
                 booking.setField(field);
-                booking.setStartTime(req.getStartTime());
-                booking.setEndTime(req.getEndTime());
+                booking.setTime(req.getTime());
                 booking.setStatus(BookingStatus.RESCHEDULED);
                 booking.setUpdateAt(LocalDateTime.now());
 

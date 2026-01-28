@@ -25,11 +25,8 @@ public class BlockedSchedule {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    @Column(name = "time", nullable = false)
+    private LocalDateTime time;
 
     @Column(name = "reason")
     private String reason;

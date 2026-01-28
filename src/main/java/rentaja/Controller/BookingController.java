@@ -45,10 +45,22 @@ public class BookingController {
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping("/bookings")
+    @GetMapping("/bookings-admin")
     @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> bookingsAdmin() {
+        List<BookingResponse> data = service.bookingsAdmin();
+        ApiResponse<List<BookingResponse>> res = ApiResponse.<List<BookingResponse>>builder()
+                .message("retrieve bookings is success")
+                .status(HttpStatus.OK.value())
+                .data(data)
+                .build();
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/bookings")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> bookings() {
-        List<BookingResponse> data = service.bookings();
+        List<BookingResponse> data = service.bookingsUser();
         ApiResponse<List<BookingResponse>> res = ApiResponse.<List<BookingResponse>>builder()
                 .message("retrieve bookings is success")
                 .status(HttpStatus.OK.value())
